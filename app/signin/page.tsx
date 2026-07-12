@@ -1,20 +1,19 @@
 "use client";
 
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase } from "@/lib/supabase";
 
 export default function SignInPage() {
   const signInWithX = async () => {
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "x",
       options: {
         redirectTo: `${window.location.origin}/`,
       },
     });
+
+    if (error) {
+      alert(`ログインエラー：${error.message}`);
+    }
   };
 
   return (
@@ -22,10 +21,11 @@ export default function SignInPage() {
       style={{
         display: "grid",
         placeItems: "center",
-        height: "100vh",
+        minHeight: "100vh",
       }}
     >
       <button
+        type="button"
         onClick={signInWithX}
         style={{
           padding: "14px 24px",

@@ -1,22 +1,49 @@
-import PostEditor from "@/components/PostEditor";
-import ReservationList from "@/components/ReservationList";
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function Home() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      setUser(user);
+    };
+
+    getUser();
+  }, []);
+
+  if (!user) {
+    return (
+      <main style={{ padding: 40 }}>
+        <h1>ログインしていません</h1>
+      </main>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-[#1f1f1f] px-6 py-10 text-white">
-      <div className="mx-auto max-w-4xl">
-        <h1 className="mb-8 text-4xl font-bold">
-          投稿予約
-        </h1>
+    <main style={{ padding: 40 }}>
+      <h1>ログイン成功！🎉</h1>
 
-        <PostEditor />
+      <p>
+        <strong>名前：</strong>
+        {user.user_metadata?.name}
+      </p>
 
-        <h2 className="mb-4 mt-10 text-2xl font-bold">
-          予約済み
-        </h2>
+      <p>
+        <strong>Xユーザー名：</strong>
+        @{user.user_metadata?.preferred_username}
+      </p>
 
-        <ReservationList />
-      </div>
+      <p>
+        <strong>ID：</strong>
+        {user.id}
+      </p>
     </main>
   );
 }
