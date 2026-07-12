@@ -10,7 +10,7 @@ const supabase = createClient(
 export default function SignInPage() {
   const signInWithX = async () => {
     await supabase.auth.signInWithOAuth({
-      provider: "twitter",
+      provider: "x",
       options: {
         redirectTo: `${window.location.origin}/`,
       },
