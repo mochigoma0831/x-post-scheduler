@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
+
 import PostEditor from "@/components/PostEditor";
+import ReservationList from "@/components/ReservationList";
+import { supabase } from "@/lib/supabase";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -19,7 +21,7 @@ export default function Home() {
       setLoading(false);
     };
 
-    checkSession();
+    void checkSession();
 
     const {
       data: { subscription },
@@ -79,6 +81,14 @@ export default function Home() {
         </div>
 
         <PostEditor />
+
+        <section className="mt-10">
+          <h2 className="mb-4 text-xl font-bold">
+            予約一覧
+          </h2>
+
+          <ReservationList />
+        </section>
       </div>
     </main>
   );
