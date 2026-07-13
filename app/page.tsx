@@ -81,8 +81,6 @@ export default function Home() {
         </div>
 
         <PostEditor />
-             <PostEditor />
-
         <section className="mt-10">
           <h2 className="mb-4 text-xl font-bold">
             予約一覧
@@ -92,3 +90,5 @@ export default function Home() {
         </section>
       </div>
     </main>
+      );
+}
