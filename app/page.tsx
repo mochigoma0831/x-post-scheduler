@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 
 import PostEditor from "@/components/PostEditor";
+import ReservationList from "@/components/ReservationList";
 import { supabase } from "@/lib/supabase";
 
 export default function Home() {
@@ -79,7 +80,17 @@ export default function Home() {
           </button>
         </div>
 
-        <PostEditor />
+        <div className="space-y-8">
+          <PostEditor />
+
+          <section>
+            <h2 className="mb-4 text-xl font-bold">
+              予約一覧
+            </h2>
+
+            <ReservationList />
+          </section>
+        </div>
       </div>
     </main>
   );
