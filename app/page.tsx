@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import PostEditor from "@/components/PostEditor";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -32,6 +33,11 @@ export default function Home() {
     };
   }, []);
 
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
   if (loading) {
     return (
       <main style={{ padding: 40 }}>
@@ -50,23 +56,30 @@ export default function Home() {
   }
 
   return (
-    <main style={{ padding: 40 }}>
-      <h1>ログイン成功！</h1>
+    <main className="min-h-screen bg-[#171717] p-6 text-white">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">
+              SNS投稿予約ツール
+            </h1>
 
-      <p>
-        <strong>名前：</strong>
-        {user.user_metadata?.name ?? "取得できませんでした"}
-      </p>
+            <p className="mt-1 text-sm text-gray-400">
+              @{user.user_metadata?.preferred_username ?? "Xユーザー"}
+            </p>
+          </div>
 
-      <p>
-        <strong>Xユーザー名：</strong>
-        @{user.user_metadata?.preferred_username ?? "取得できませんでした"}
-      </p>
+          <button
+            type="button"
+            onClick={logout}
+            className="rounded-lg border border-gray-600 px-4 py-2 text-sm hover:bg-gray-800"
+          >
+            ログアウト
+          </button>
+        </div>
 
-      <p>
-        <strong>ID：</strong>
-        {user.id}
-      </p>
+        <PostEditor />
+      </div>
     </main>
   );
 }
