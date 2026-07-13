@@ -62,7 +62,6 @@ export default function ReservationList() {
       setIsLoading(false);
       return;
     }
-
     const loadedReservations =
       (data ?? []) as Reservation[];
 
