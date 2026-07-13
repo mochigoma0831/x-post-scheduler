@@ -79,6 +79,7 @@ export default function PostEditor() {
   const [editingId, setEditingId] =
     useState<string | null>(null);
 
+  const postsRef = useRef(posts);
   const originalStoragePaths = useRef<string[]>([]);
   const nextPostId = useRef(3);
   const nextImageId = useRef(1);
@@ -441,13 +442,6 @@ export default function PostEditor() {
         event as CustomEvent<EditableReservation>
       ).detail;
 
-      posts.forEach((post) => {
-        post.images.forEach((image) => {
-          if (!image.isExisting) {
-            URL.revokeObjectURL(image.previewUrl);
-          }
-        });
-      });
 
       const storagePaths =
         (reservation.threads ?? []).flatMap(
@@ -591,7 +585,7 @@ export default function PostEditor() {
         handleEditReservation
       );
     };
-  }, [posts]);
+  }, []);
 
   const resetForm = () => {
     posts.forEach((post) => {
