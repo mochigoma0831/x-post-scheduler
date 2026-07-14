@@ -15,7 +15,7 @@ export default function SignInPage() {
       provider: "x",
       options: {
         redirectTo: `${window.location.origin}/`,
-        scopes: "tweet.read users.read offline.access",
+        scopes: "tweet.read tweet.write users.read offline.access",
       },
     });
 
