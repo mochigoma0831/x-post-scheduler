@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+
 import { supabase } from "@/lib/supabase";
 
 export default function AuthCallbackPage() {
@@ -9,26 +10,47 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const finishLogin = async () => {
-      const code = new URLSearchParams(window.location.search).get("code");
+      const code = new URLSearchParams(
+        window.location.search
+      ).get("code");
 
       if (!code) {
-        alert("ログイン情報を受け取れませんでした");
+        alert(
+          "ログイン情報を受け取れませんでした"
+        );
         router.replace("/signin");
         return;
       }
 
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      const { data, error } =
+        await supabase.auth.exchangeCodeForSession(
+          code
+        );
 
       if (error) {
-        alert(`ログイン処理エラー：${error.message}`);
+        alert(
+          `ログイン処理エラー：${error.message}`
+        );
         router.replace("/signin");
         return;
       }
+
+      console.log(
+        "provider_tokenあり:",
+        Boolean(data.session?.provider_token)
+      );
+
+      console.log(
+        "provider_refresh_tokenあり:",
+        Boolean(
+          data.session?.provider_refresh_token
+        )
+      );
 
       router.replace("/");
     };
 
-    finishLogin();
+    void finishLogin();
   }, [router]);
 
   return (
