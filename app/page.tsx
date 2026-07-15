@@ -34,7 +34,17 @@ export default function Home() {
       subscription.unsubscribe();
     };
   }, []);
+useEffect(() => {
+  const checkUser = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
+
+  };
+
+  checkUser();
+}, []);
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
