@@ -5,19 +5,22 @@ import { supabase } from "@/lib/supabase";
 
 export default function SignInPage() {
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] =
+    useState("");
 
   const signInWithX = async () => {
     setLoading(true);
     setErrorMessage("");
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "x",
-      options: {
-        redirectTo: `${window.location.origin}/`,
-        scopes: "tweet.read tweet.write users.read offline.access",
-      },
-    });
+    const { error } =
+      await supabase.auth.signInWithOAuth({
+        provider: "x",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          scopes:
+            "tweet.read tweet.write users.read offline.access",
+        },
+      });
 
     if (error) {
       setErrorMessage(error.message);
@@ -41,10 +44,14 @@ export default function SignInPage() {
           onClick={signInWithX}
           disabled={loading}
         >
-          {loading ? "Xに接続中..." : "Xでログイン"}
+          {loading
+            ? "Xに接続中..."
+            : "Xでログイン"}
         </button>
 
-        {errorMessage && <p>エラー：{errorMessage}</p>}
+        {errorMessage && (
+          <p>エラー：{errorMessage}</p>
+        )}
       </div>
     </main>
   );
