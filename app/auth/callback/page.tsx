@@ -27,25 +27,61 @@ export default function AuthCallbackPage() {
           code
         );
 
-      if (error) {
+      if (error || !data.session) {
         alert(
-          `ログイン処理エラー：${error.message}`
+          `ログイン処理エラー：${
+            error?.message ??
+            "セッションを取得できませんでした"
+          }`
         );
         router.replace("/signin");
         return;
       }
 
-      console.log(
-        "provider_tokenあり:",
-        Boolean(data.session?.provider_token)
+      if (!data.session.provider_token) {
+        alert(
+          "Xのアクセストークンを取得できませんでした"
+        );
+        router.replace("/signin");
+        return;
+      }
+
+      const response = await fetch(
+        "/api/x/accounts",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Authorization: `Bearer ${data.session.access_token}`,
+          },
+          body: JSON.stringify({
+            xUserId:
+              data.session.user.user_metadata
+                ?.provider_id ?? null,
+            accessToken:
+              data.session.provider_token,
+            refreshToken:
+              data.session
+                .provider_refresh_token ??
+              null,
+            expiresAt: null,
+          }),
+        }
       );
 
-      console.log(
-        "provider_refresh_tokenあり:",
-        Boolean(
-          data.session?.provider_refresh_token
-        )
-      );
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        alert(
+          `Xアカウント保存エラー：${
+            result.message ??
+            "保存できませんでした"
+          }`
+        );
+        router.replace("/signin");
+        return;
+      }
 
       router.replace("/");
     };
