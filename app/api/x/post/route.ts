@@ -1,15 +1,39 @@
 import { NextResponse } from "next/server";
 
-export async function GET() {
-  return NextResponse.json({
-    success: true,
-    message: "X投稿API(GET)へ到達しました",
-  });
-}
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-export async function POST() {
+export async function GET() {
+  const { data, error } = await supabaseAdmin
+    .from("x_accounts")
+    .select(
+      "user_id, x_user_id, access_token, refresh_token"
+    )
+    .limit(1)
+    .single();
+
+  if (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: error.message,
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+
   return NextResponse.json({
     success: true,
-    message: "X投稿API(POST)へ到達しました",
+    account: {
+      userId: data.user_id,
+      xUserId: data.x_user_id,
+      hasAccessToken: Boolean(
+        data.access_token
+      ),
+      hasRefreshToken: Boolean(
+        data.refresh_token
+      ),
+    },
   });
 }
