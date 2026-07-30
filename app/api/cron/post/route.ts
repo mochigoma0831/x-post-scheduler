@@ -64,6 +64,9 @@ export async function GET() {
  * このPOSTが呼ばれると実際にXへ投稿します
  */
 export async function POST() {
+  console.log("=== CRON POST ===");
+console.log(new Date().toISOString());
+console.log("POST was called");
   const { post, error: postError } =
     await getDuePost();
 
@@ -226,11 +229,15 @@ export async function POST() {
     );
   }
 
-  return NextResponse.json({
-    success: true,
-    message:
-      "Xへの投稿とステータス更新に成功しました",
-    postId: post.id,
-    xResult,
-  });
+return NextResponse.json({
+  success: true,
+  message: "Xへの投稿とステータス更新に成功しました",
+  postId: post.id,
+  xResult,
+  debug: {
+    now: new Date().toISOString(),
+    text,
+    postStatus: "posted",
+  },
+});
 }
