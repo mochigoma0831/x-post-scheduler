@@ -168,6 +168,7 @@ console.log("POST was called");
       { status: 500 }
     );
   }
+ console.log("About to call X API");
 
   const xResponse = await fetch(
     "https://api.x.com/2/tweets",
@@ -186,6 +187,12 @@ console.log("POST was called");
   );
 
   const xResult = await xResponse.json();
+
+  console.log("About to return from X");
+console.log("X STATUS:", xResponse.status);
+console.log("X RESULT:", JSON.stringify(xResult));
+  console.log("X STATUS:", xResponse.status);
+console.log("X RESULT:", JSON.stringify(xResult));
 
   if (!xResponse.ok) {
     await supabaseAdmin
