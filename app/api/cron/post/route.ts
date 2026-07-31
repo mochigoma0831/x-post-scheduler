@@ -3,9 +3,17 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { refreshAccessToken } from "@/lib/xRefreshToken";
 
+type Image = {
+  order?: number;
+  url?: string;
+  path?: string;
+  name?: string;
+};
+
 type Thread = {
   order?: number;
   text?: string;
+  images?: Image[];
 };
 
 async function getDuePost() {
@@ -88,13 +96,15 @@ export async function POST() {
       ? (post.threads as Thread[])
       : [];
 
-    const firstThread = [...threads]
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      .find(
-        (thread) =>
-          typeof thread.text === "string" &&
-          thread.text.trim() !== ""
-      );
+      const sortedThreads = [...threads].sort(
+  (a, b) => (a.order ?? 0) - (b.order ?? 0)
+);
+
+   const firstThread = sortedThreads.find(
+  (thread) =>
+    typeof thread.text === "string" &&
+    thread.text.trim() !== ""
+);
 
     const text = firstThread?.text?.trim();
 
@@ -133,44 +143,92 @@ export async function POST() {
 
     const accessToken = await refreshAccessToken();
 
-    const xResponse = await fetch(
-      "https://api.x.com/2/tweets",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text,
-        }),
-      }
+const { TwitterApi } = await import("twitter-api-v2");
+const { uploadImageToX } = await import("@/lib/xUploadMedia");
+
+const client = new TwitterApi(accessToken);
+
+let replyToId: string | undefined;
+let lastResult: unknown;
+
+for (const thread of sortedThreads) {
+  const mediaIds: string[] = [];
+
+  const images = [...(thread.images ?? [])].sort(
+    (a, b) => (a.order ?? 0) - (b.order ?? 0)
+  );
+
+  for (const image of images) {
+    if (!image.url) continue;
+
+    const mediaId = await uploadImageToX(
+      accessToken,
+      image.url
     );
 
-    const xResult = await xResponse.json();
+    mediaIds.push(mediaId);}
+const payload = {
+  text: thread.text ?? "",
+} as {
+  text: string;
+  media?: {
+    media_ids:
+      | [string]
+      | [string, string]
+      | [string, string, string]
+      | [string, string, string, string];
+  };
+  reply?: {
+    in_reply_to_tweet_id: string;
+  };
+};
 
-    console.log("X STATUS:", xResponse.status);
-    console.log("X RESULT:", JSON.stringify(xResult));
+if (mediaIds.length > 0) {
+  payload.media = {
+    media_ids: mediaIds as
+      | [string]
+      | [string, string]
+      | [string, string, string]
+      | [string, string, string, string],
+  };
+}
 
-    if (!xResponse.ok) {
-      await supabaseAdmin
-        .from("posts")
-        .update({
-          status: "scheduled",
-        })
-        .eq("id", post.id);
+if (replyToId) {
+  payload.reply = {
+    in_reply_to_tweet_id: replyToId,
+  };
+}
 
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Xへの投稿に失敗しました",
-          status: xResponse.status,
-          error: xResult,
-        },
-        { status: xResponse.status }
-      );
-    }
 
+const result = await client.v2.tweet(payload);
+  replyToId = result.data.id;
+  lastResult = result;
+}
+
+const xResponse = {
+  ok: true,
+  status: 200,
+};
+
+const xResult = lastResult;
+if (!xResponse.ok) {
+  await supabaseAdmin
+    .from("posts")
+    .update({
+      status: "scheduled",
+    })
+    .eq("id", post.id);
+
+  return NextResponse.json(
+    {
+      success: false,
+      message: "Xへの投稿に失敗しました",
+      status: xResponse.status,
+      error: xResult,
+    },
+    { status: xResponse.status }
+  );
+}
     const { error: updateError } =
       await supabaseAdmin
         .from("posts")
