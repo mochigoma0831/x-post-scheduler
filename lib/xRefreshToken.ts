@@ -19,10 +19,23 @@ export async function refreshAccessToken() {
     body: new URLSearchParams({
       grant_type: "refresh_token",
       refresh_token: account.refresh_token,
+      client_id: process.env.X_CLIENT_ID!,
     }),
   });
 
   const result = await response.json();
 
-  return result;
+  if (!response.ok) {
+    throw new Error(JSON.stringify(result));
+  }
+
+  await supabaseAdmin
+    .from("x_accounts")
+    .update({
+      access_token: result.access_token,
+      refresh_token: result.refresh_token ?? account.refresh_token,
+    })
+    .eq("id", account.id);
+
+  return result.access_token;
 }
