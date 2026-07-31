@@ -11,15 +11,22 @@ export async function refreshAccessToken() {
     throw new Error("Xアカウントが見つかりません");
   }
 
+  const clientId = process.env.X_CLIENT_ID!;
+  const clientSecret = process.env.X_CLIENT_SECRET!;
+
+  const basicAuth = Buffer.from(
+    `${clientId}:${clientSecret}`
+  ).toString("base64");
+
   const response = await fetch("https://api.x.com/2/oauth2/token", {
     method: "POST",
     headers: {
+      Authorization: `Basic ${basicAuth}`,
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
       grant_type: "refresh_token",
       refresh_token: account.refresh_token,
-      client_id: process.env.X_CLIENT_ID!,
     }),
   });
 
